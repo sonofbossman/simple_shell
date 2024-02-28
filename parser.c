@@ -1,86 +1,64 @@
 #include "shell.h"
 
 /**
- * is_cmd - determines if a file is an executable command
- * @info: the info struct
- * @path: path to the file
+ * tokenize - parsing user input into arguments
+ *            by splits an array string into tokens using a delimiter.
+ * @str: the string to be tokenized.
+ * @delim: the delimiter used to split the string.
  *
- * Return: 1 if true, 0 otherwise
+ * Return: an array of pointers to the tokens,
+ *         or NULL if an error occurs.
  */
-int is_cmd(info_t *info, char *path)
+char **tokenize(char *str, const char *delim)
 {
-	struct stat st;
+	char *token = NULL;
+	char **xmp = NULL;
+	int i = 0;
 
-	(void)info;
-	if (!path || stat(path, &st))
-		return (0);
-
-	if (st.st_mode & S_IFREG)
+	token = strtok(str, delim);
+	while (token)
 	{
-		return (1);
-	}
-	return (0);
-}
+		xmp = realloc(xmp, sizeof(char *) * (i + 1));
+		if (xmp == NULL)
+			return (NULL);
 
-/**
- * dup_chars - duplicates characters
- * @pathstr: the PATH string
- * @start: starting index
- * @stop: stopping index
- *
- * Return: pointer to new buffer
- */
-char *dup_chars(char *pathstr, int start, int stop)
-{
-	static char buf[1024];
-	int i = 0, k = 0;
+		xmp[i] = malloc(_strlen(token) + 1);
+		if (!(xmp[i]))
+			return (NULL);
 
-	for (k = 0, i = start; i < stop; i++)
-		if (pathstr[i] != ':')
-			buf[k++] = pathstr[i];
-	buf[k] = 0;
-	return (buf);
-}
-
-/**
- * find_path - finds this cmd in the PATH string
- * @info: the info struct
- * @pathstr: the PATH string
- * @cmd: the cmd to find
- *
- * Return: full path of cmd if found or NULL
- */
-char *find_path(info_t *info, char *pathstr, char *cmd)
-{
-	int i = 0, curr_pos = 0;
-	char *path;
-
-	if (!pathstr)
-		return (NULL);
-	if ((_strlen(cmd) > 2) && starts_with(cmd, "./"))
-	{
-		if (is_cmd(info, cmd))
-			return (cmd);
-	}
-	while (1)
-	{
-		if (!pathstr[i] || pathstr[i] == ':')
-		{
-			path = dup_chars(pathstr, curr_pos, i);
-			if (!*path)
-				_strcat(path, cmd);
-			else
-			{
-				_strcat(path, "/");
-				_strcat(path, cmd);
-			}
-			if (is_cmd(info, path))
-				return (path);
-			if (!pathstr[i])
-				break;
-			curr_pos = i;
-		}
+		_strcpy(xmp[i], token);
+		token = strtok(NULL, delim);
 		i++;
 	}
-	return (NULL);
+	/*increase the size of the array*/
+	xmp = realloc(xmp, (i + 1) * sizeof(char *));
+	if (!xmp)
+		return (NULL);
+
+	xmp[i] = NULL;
+	return (xmp);
+}
+
+/**
+ * tokenize_input - splits a user input string into tokens with tokenize().
+ * @input: the user input string to be tokenized
+ *
+ * Return: an array of pointers to the tokens, or NULL if an error occurs
+ */
+char **tokenize_input(char *input)
+{
+	char **tokens = NULL;
+	char *templ = NULL;
+
+	templ = _strdup(input);
+	if (templ == NULL)
+	{
+		_puts("Memory allocation error\n");
+		exit(EXIT_FAILURE);
+	}
+
+	tokens = tokenize(templ, " \t\r\n\a");
+	free(templ);
+
+	return (tokens);
 }
