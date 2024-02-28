@@ -15,7 +15,7 @@ int _atoi(const char *str)
 	sign = 1;
 	numb = 0;
 
-	while (str[i] != '\0')
+	while (str[k] != '\0')
 	{
 		if (str[k] == '-')
 			sign *= -1;
@@ -82,7 +82,7 @@ void *_realloc(void *ptr, unsigned int old_size, unsigned int new_size)
 	if (new_size == old_size)
 		return (ptr);
 
-	p = malloc(new_size);
+	m = malloc(new_size);
 	if (!m)
 		return (NULL);
 
